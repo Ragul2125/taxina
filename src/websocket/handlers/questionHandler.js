@@ -89,11 +89,17 @@ const handleQuestion = (io, socket) => {
             const { questionId, chatSessionId } = data;
 
             if (!questionId || !chatSessionId) {
+                logger.warn('Missing questionId or chatSessionId in question_tapped event');
                 return;
             }
 
             // Get question details
             const questionData = await questionService.getAnswersForQuestion(questionId);
+            logger.info('Question data retrieved:', {
+                questionId: questionData.questionId,
+                questionText: questionData.questionText,
+                answersCount: questionData.answers?.length || 0
+            });
 
             // Notify driver in the same chat room
             const roomName = `chat_${chatSessionId}`;
@@ -103,10 +109,11 @@ const handleQuestion = (io, socket) => {
                 askedByName: socket.user.name
             });
 
-            logger.info(`Customer ${socket.userId} tapped question ${questionId} in chat ${chatSessionId}`);
+            logger.info(`Customer ${socket.userId} tapped question ${questionId} in chat ${chatSessionId}, notified room ${roomName}`);
 
         } catch (error) {
             logger.error('Error in question_tapped:', error);
+            socket.emit('error', { message: 'Failed to send question' });
         }
     });
 

@@ -6,9 +6,12 @@ const handleQuestion = require('./handlers/questionHandler');
 const config = require('../config/env');
 const logger = require('../utils/logger');
 
+
 /**
  * Initialize Socket.io server
  */
+let ioInstance = null;
+
 const initializeSocket = (httpServer) => {
     const io = new Server(httpServer, {
         cors: {
@@ -42,7 +45,20 @@ const initializeSocket = (httpServer) => {
 
     logger.success('Socket.io server initialized');
 
+    // Store io instance
+    ioInstance = io;
+
     return io;
 };
 
-module.exports = initializeSocket;
+/**
+ * Get current Socket.io instance
+ */
+const getIO = () => {
+    if (!ioInstance) {
+        throw new Error('Socket.io not initialized');
+    }
+    return ioInstance;
+};
+
+module.exports = { initializeSocket, getIO };

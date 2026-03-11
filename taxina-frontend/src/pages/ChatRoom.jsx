@@ -334,16 +334,21 @@ export default function ChatRoom() {
                             <p className="text-lg text-blue-600 font-medium mt-1">{selectedQuestion.questionText}</p>
                         </div>
 
+
                         <div className="space-y-3">
-                            {selectedQuestion.answers.map((answer, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleAnswerSelect(answer)}
-                                    className="w-full text-left px-5 py-4 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl transition group"
-                                >
-                                    <span className="font-medium text-gray-700 group-hover:text-blue-700">{answer}</span>
-                                </button>
-                            ))}
+                            {selectedQuestion.answers && selectedQuestion.answers.length > 0 ? (
+                                selectedQuestion.answers.map((answer, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => handleAnswerSelect(answer)}
+                                        className="w-full text-left px-5 py-4 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 rounded-xl transition group"
+                                    >
+                                        <span className="font-medium text-gray-700 group-hover:text-blue-700">{answer}</span>
+                                    </button>
+                                ))
+                            ) : (
+                                <p className="text-center text-gray-500">No answers available</p>
+                            )}
                         </div>
                         <button
                             onClick={() => setSelectedQuestion(null)}

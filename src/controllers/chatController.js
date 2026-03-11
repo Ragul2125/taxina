@@ -31,15 +31,40 @@ const createChatSession = asyncHandler(async (req, res) => {
         driverId
     });
 
+    let isNewSession = false;
+
     if (!chatSession) {
         chatSession = await ChatSession.create({
             passengerId,
             driverId,
             status: 'ACTIVE'
         });
+        isNewSession = true;
     } else if (chatSession.status === 'CLOSED') {
         chatSession.status = 'ACTIVE';
         await chatSession.save();
+    }
+
+    // Populate user details for response
+    await chatSession.populate('passengerId driverId');
+
+    // Broadcast new session to both participants via socket
+    if (isNewSession) {
+        try {
+            const { getIO } = require('../websocket/socketManager');
+            const io = getIO();
+
+            // Emit to both the passenger and driver
+            io.emit('chat_session_created', {
+                sessionId: chatSession._id,
+                session: chatSession
+            });
+
+            logger.info(`New chat session created between ${passengerId} and ${driverId}`);
+        } catch (error) {
+            logger.error('Socket broadcast error:', error);
+            // Don't fail the request if socket broadcast fails
+        }
     }
 
     res.status(201).json({

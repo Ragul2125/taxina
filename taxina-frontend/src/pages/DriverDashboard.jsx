@@ -9,8 +9,36 @@ export default function DriverDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
+
     useEffect(() => {
         loadChats();
+
+        // Connect socket for real-time updates
+        const token = localStorage.getItem('token');
+        if (token) {
+            import('../services/socket').then(({ default: socketService }) => {
+                socketService.connect(token);
+
+                // Listen for new messages to update the session list
+                socketService.on('new_message', (message) => {
+                    console.log('New message received, updating dashboard:', message);
+                    // Reload chat sessions to update "last active" time
+                    loadChats();
+                });
+
+                // Listen for new chat sessions
+                socketService.on('chat_session_created', (session) => {
+                    console.log('New chat session created:', session);
+                    loadChats();
+                });
+
+                // Cleanup on unmount
+                return () => {
+                    socketService.removeAllListeners('new_message');
+                    socketService.removeAllListeners('chat_session_created');
+                };
+            });
+        }
     }, []);
 
     const loadChats = async () => {

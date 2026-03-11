@@ -1,7 +1,7 @@
 const http = require('http');
 const createApp = require('./src/app');
 const connectDatabase = require('./src/config/database');
-const initializeSocket = require('./src/websocket/socketManager');
+const { initializeSocket } = require('./src/websocket/socketManager');
 const config = require('./src/config/env');
 const logger = require('./src/utils/logger');
 
